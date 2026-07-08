@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="512" height="512">
+  <defs>
+    <linearGradient id="lgMain" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#5a1d75"/>
+      <stop offset="50%" stop-color="#9b4dbb"/>
+      <stop offset="100%" stop-color="#c86dd7"/>
+    </linearGradient>
+    <linearGradient id="lgGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f4cf6d"/>
+      <stop offset="100%" stop-color="#d4a437"/>
+    </linearGradient>
+  </defs>
+  <!-- Masareefy (مصاريفي) brand mark — transparent background:
+       a flowing amethyst "M" ribbon (a spending-trend line),
+       a floating gold coin above its peak, a gold arc cradling it below -->
+  <path d="M28 78 C36 54 42 40 47 40 C52 40 55 62 60 62 C65 62 69 34 74 34 C79 34 86 58 91 74"
+    fill="none" stroke="url(#lgMain)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="74" cy="21" r="5.5" fill="url(#lgGold)"/>
+  <path d="M30 90 Q60 101 90 90" fill="none" stroke="url(#lgGold)" stroke-width="3" stroke-linecap="round"/>
+</svg>
