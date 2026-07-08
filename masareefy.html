@@ -225,14 +225,22 @@
       <path d="M30 90 Q60 101 90 90" fill="none" stroke="url(#lgGold)" stroke-width="3" stroke-linecap="round"/>
     </svg>
     <h1 data-i18n="appTitle">Masareefy</h1>
-    <p class="sub" data-i18n="signInSub">Please sign in to continue</p>
-    <div class="hint" id="defaultHint" data-i18n="defaultHint"></div>
-    <form onsubmit="return doLogin(event)">
+    <p class="sub" id="loginSub" data-i18n="signInSub">Please sign in to continue</p>
+    <form id="loginForm" onsubmit="return doLogin(event)">
       <label data-i18n="userId">User ID</label>
       <input type="text" id="loginUser" autocomplete="username" required>
       <label data-i18n="password">Password</label>
       <input type="password" id="loginPass" autocomplete="current-password" required>
       <button class="btn full" type="submit" data-i18n="signInBtn">Sign In ✨</button>
+    </form>
+    <form id="setupForm" style="display:none" onsubmit="return doSetup(event)">
+      <label data-i18n="userId">User ID</label>
+      <input type="text" id="suUser" minlength="2" maxlength="20" required>
+      <label data-i18n="password">Password</label>
+      <input type="password" id="suPass" minlength="4" required>
+      <label data-i18n="confirmPass">Confirm new password</label>
+      <input type="password" id="suPass2" minlength="4" required>
+      <button class="btn full" type="submit" data-i18n="createBtn">Create Account ✨</button>
     </form>
   </div>
 </div>
@@ -526,7 +534,8 @@ function bgGradient(th){ const b=th.bg||th.c; return "linear-gradient(135deg,"+b
 const I18N = {
 en:{
   appTitle:"Masareefy", signInSub:"Please sign in to continue",
-  defaultHint:"First time? Default login — User ID: <b>joe</b> &nbsp;Password: <b>8185</b><br>(change it from Settings after signing in)",
+  setupSub:"Welcome! Create your account — everything stays private on this device",
+  createBtn:"Create Account ✨", accountCreated:"🎉 Account created — welcome!",
   userId:"User ID", password:"Password", signInBtn:"Sign In ✨", wrongLogin:"❌ Wrong User ID or password",
   logout:"Logout 🚪", signedAs:"Signed in as",
   tabDash:"📊 Dashboard", tabAdd:"➕ Add Expense", tabReport:"📋 Reports", tabSettings:"⚙️ Settings",
@@ -583,8 +592,9 @@ en:{
   catDeleted:"🗑️ Category deleted", noCustomCats:"No custom categories yet — add your own below."
 },
 ar:{
-  appTitle:"مصاريف هلا", signInSub:"الرجاء تسجيل الدخول للمتابعة",
-  defaultHint:"أول مرة؟ الدخول الافتراضي — المستخدم: <b>joe</b> &nbsp;كلمة المرور: <b>8185</b><br>(غيّرها من الإعدادات بعد الدخول)",
+  appTitle:"مصاريفي", signInSub:"الرجاء تسجيل الدخول للمتابعة",
+  setupSub:"أهلاً بك! أنشئ حسابك — كل بياناتك تبقى خاصة على هذا الجهاز",
+  createBtn:"إنشاء الحساب ✨", accountCreated:"🎉 تم إنشاء الحساب — أهلاً بك!",
   userId:"اسم المستخدم", password:"كلمة المرور", signInBtn:"تسجيل الدخول ✨", wrongLogin:"❌ اسم المستخدم أو كلمة المرور غير صحيحة",
   logout:"تسجيل الخروج 🚪", signedAs:"تم الدخول باسم",
   tabDash:"📊 لوحة المعلومات", tabAdd:"➕ إضافة مصروف", tabReport:"📋 التقارير", tabSettings:"⚙️ الإعدادات",
@@ -669,11 +679,12 @@ function allCats(){ return CATEGORIES.concat(loadCustomCats()); }
 /* one-time migration from version 1 (single user) */
 (function migrate(){
   if(localStorage.getItem(LS_USERS)) return;
-  let user="joe", pass="8185";
   const old=lsGet("hala_credentials",null);
+  const oldExp=localStorage.getItem("hala_expenses");
+  if(!old && !oldExp) return; /* fresh install: first-run setup creates the account */
+  let user="joe", pass="8185";
   if(old && old.user && old.pass){ user=old.user; pass=old.pass; }
   saveUsers([{user:user, pass:pass, admin:true, owner:true}]);
-  const oldExp=localStorage.getItem("hala_expenses");
   if(oldExp){ localStorage.setItem("hala_expenses_"+user.toLowerCase(), oldExp); localStorage.removeItem("hala_expenses"); }
   localStorage.removeItem("hala_credentials");
 })();
@@ -686,10 +697,13 @@ function allCats(){ return CATEGORIES.concat(loadCustomCats()); }
     saveUsers(users);
   }
 })();
-/* make "joe" the one and only owner/admin, whatever the previous state */
+/* one-time upgrade of legacy installs: make "joe" the one and only owner/admin */
 (function enforceJoeOwner(){
+  if(localStorage.getItem("hala_joe_migrated")) return;
   const users=loadUsers();
   if(!users.length) return;
+  /* only applies to legacy installs that still carry the old "hala" account */
+  if(!users.some(u=>u.user.toLowerCase()==="hala")){ localStorage.setItem("hala_joe_migrated","1"); return; }
   let joe=users.find(u=>u.user.toLowerCase()==="joe");
   const owner=users.find(u=>u.owner);
   if(joe){
@@ -707,6 +721,7 @@ function allCats(){ return CATEGORIES.concat(loadCustomCats()); }
   }
   users.forEach(u=>{ if(u!==joe){ u.owner=false; u.admin=false; } });
   saveUsers(users);
+  localStorage.setItem("hala_joe_migrated","1");
 })();
 
 /* ================= STATE ================= */
@@ -786,6 +801,21 @@ function esc(s){ const d=document.createElement("div"); d.textContent=s; return 
 
 /* ================= LOGIN / USERS ================= */
 function findUser(id){ return loadUsers().find(u=>u.user.toLowerCase()===id.trim().toLowerCase()); }
+function doSetup(e){
+  e.preventDefault();
+  const u=document.getElementById("suUser").value.trim();
+  const p=document.getElementById("suPass").value;
+  const p2=document.getElementById("suPass2").value;
+  if(p!==p2){ toast(t("noMatchPass")); return false; }
+  if(p.length<4){ toast(t("shortPass")); return false; }
+  const user={user:u, pass:p, admin:true, owner:true};
+  saveUsers([user]);
+  localStorage.setItem("hala_joe_migrated","1");
+  sessionStorage.setItem("hala_current",u);
+  toast(t("accountCreated"));
+  enterApp(user);
+  return false;
+}
 function doLogin(e){
   e.preventDefault();
   const u=findUser(document.getElementById("loginUser").value);
@@ -1277,10 +1307,13 @@ function refreshAll(){ renderDash(); renderReport(); renderIncome(); }
   document.getElementById("iDate").value=todayStr();
   document.getElementById("viewBars").classList.toggle("active",settings.chartView==="bars");
   document.getElementById("viewPie").classList.toggle("active",settings.chartView==="pie");
-  /* hide default hint once default password changed */
-  const users=loadUsers();
-  const owner=users.find(u=>u.owner);
-  if(!owner || owner.user.toLowerCase()!=="joe" || owner.pass!=="8185") document.getElementById("defaultHint").style.display="none";
+  /* first run on this device: show account creation instead of sign-in */
+  if(!loadUsers().length){
+    document.getElementById("loginForm").style.display="none";
+    document.getElementById("setupForm").style.display="block";
+    const sub=document.getElementById("loginSub");
+    sub.dataset.i18n="setupSub"; sub.innerHTML=t("setupSub");
+  }
   /* restore session */
   const sess=sessionStorage.getItem("hala_current");
   if(sess){ const u=findUser(sess); if(u) enterApp(u); }

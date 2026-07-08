@@ -2,7 +2,7 @@
 
 A colorful, bilingual (English/العربية) personal expense tracker built for Kuwait — Kuwaiti Dinar (KD) with 3 decimals, KNET and local payment types, and full right-to-left Arabic support.
 
-**Live app:** open `index.html` (or `expense-tracker.html`) in any browser. No installation, no server, no account online — all data stays on your device (browser local storage).
+**Live app:** open `masareefy.html` in any browser. No installation, no server, no account online — all data stays on your device (browser local storage). On first run you create your own private account.
 
 ## Features
 
