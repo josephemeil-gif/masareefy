@@ -423,14 +423,16 @@
       </form>
     </div>
 
+    <div class="card">
+      <h2 data-i18n="themeTitle">🎨 Theme &amp; Colors</h2>
+      <div class="theme-grid" id="themeGrid"></div>
+    </div>
+
     <!-- ---- ADMIN CARD ---- -->
     <div class="card admin-card" id="adminCard" style="display:none">
       <h2 data-i18n="adminTitle">👑 Admin Panel</h2>
 
-      <h3 style="font-size:.95rem;margin:12px 0 10px" data-i18n="themeTitle">🎨 Theme &amp; Colors</h3>
-      <div class="theme-grid" id="themeGrid"></div>
-
-      <h3 style="font-size:.95rem;margin:22px 0 10px" data-i18n="usersTitle">👥 User Profiles</h3>
+      <h3 style="font-size:.95rem;margin:12px 0 10px" data-i18n="usersTitle">👥 User Profiles</h3>
       <div class="table-scroll">
         <table>
           <thead><tr><th data-i18n="userId">User ID</th><th data-i18n="role">Role</th><th></th><th></th></tr></thead>
@@ -746,13 +748,25 @@ function applyTheme(id){
   th.stats.forEach((s,i)=>rs.setProperty("--stat"+(i+1),"linear-gradient(135deg,"+s[0]+","+s[1]+")"));
   document.body.classList.toggle("light",!!th.light);
 }
+function currentTheme(){
+  const id=currentUser&&currentUser.theme?currentUser.theme:settings.theme;
+  return THEMES.find(x=>x.id===id)?id:"amethyst";
+}
 function setTheme(id){
-  settings.theme=id; saveSettings(); applyTheme(id); renderThemeGrid(); toast(t("themeSet"));
+  if(currentUser){
+    const users=loadUsers();
+    const u=users.find(x=>x.user.toLowerCase()===currentUser.user.toLowerCase());
+    if(u){ u.theme=id; saveUsers(users); }
+    currentUser.theme=id;
+  }
+  settings.theme=id; saveSettings();
+  applyTheme(id); renderThemeGrid(); toast(t("themeSet"));
 }
 function renderThemeGrid(){
   const el=document.getElementById("themeGrid");
+  const sel=currentTheme();
   el.innerHTML=THEMES.map(th=>
-    '<div><div class="theme-sw'+(settings.theme===th.id?" sel":"")+'" style="background:'+bgGradient(th)+'" onclick="setTheme(\''+th.id+'\')"></div>'+
+    '<div><div class="theme-sw'+(sel===th.id?" sel":"")+'" style="background:'+bgGradient(th)+'" onclick="setTheme(\''+th.id+'\')"></div>'+
     '<div class="theme-name">'+themeLabel(th)+"</div></div>"
   ).join("");
 }
@@ -789,6 +803,7 @@ function enterApp(u){
   document.getElementById("loginScreen").style.display="none";
   document.getElementById("appScreen").style.display="block";
   document.getElementById("adminCard").style.display=u.owner?"block":"none";
+  applyTheme(currentTheme());
   fillDropdowns(); setWhoami(); buildBudgetGrid(); renderThemeGrid(); renderUsers(); renderCustomCats(); refreshAll();
 }
 function setWhoami(){
