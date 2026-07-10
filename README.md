@@ -8,15 +8,18 @@ A colorful, bilingual (English/العربية) personal expense tracker built fo
 
 ## Features
 
-- 📊 Dashboard with month navigation, smart insights, budget ring, and category charts (bars or pie)
+- 📊 Dashboard with month navigation, budget ring, and reminder notifications
 - ➕ Expense & income entry via a floating button, with 🎤 voice input (Arabic & English)
-- 💳 Bills: subscriptions with renewal reminders + installments with payment progress
+- 💳 Bills: subscriptions & installments with icons, quick-add presets, and per-item renewal reminders
 - 🎯 Savings goals with progress bars, and monthly budgets (overall + per category)
-- 📅 Daily spending chart, top-5 expenses, and weekday spending patterns
+- 🧠 Dedicated Insights section — Overview, Trends (incl. income vs expenses), and Details
 - 📋 Reports with filters, quick category chips, CSV export, and print/PDF
+- 🏷️ Category & income icons throughout; custom categories with your own emoji + color
+- 🔔 In-app reminder bar plus optional browser notifications for upcoming renewals
 - 💾 One-click full backup & restore (all users, all data)
 - 👥 Multiple user profiles with owner-controlled user management
 - 🎨 11 elegant color themes (including light themes)
+- 📲 Installable PWA — "Add to Home Screen" and works offline
 - 🌐 One-tap English ↔ Arabic toggle with RTL layout, mobile app-style bottom navigation
 
 ## Notes
