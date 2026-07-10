@@ -10,7 +10,7 @@ A colorful, bilingual (English/العربية) personal expense tracker built fo
 
 - 📊 Dashboard with month navigation, budget ring, and reminder notifications
 - ➕ Expense & income entry via a floating button, with 🎤 voice input (Arabic & English)
-- 💳 Bills: subscriptions & installments with icons, quick-add presets, and per-item renewal reminders
+- 💳 Bills: subscriptions with real brand logos (Netflix, Spotify, Claude…) & installments with a bank-loan icon, quick-add presets, and per-item renewal reminders
 - 🎯 Savings goals with progress bars, and monthly budgets (overall + per category)
 - 🧠 Dedicated Insights section — Overview, Trends (incl. income vs expenses), and Details
 - 📋 Reports with filters, quick category chips, CSV export, and print/PDF
