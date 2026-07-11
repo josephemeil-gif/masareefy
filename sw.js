@@ -1,5 +1,5 @@
 /* Masareefy service worker — cache-first so the app works offline */
-const CACHE = "masareefy-v1";
+const CACHE = "masareefy-v2";
 const ASSETS = ["./", "./masareefy.html", "./index.html", "./manifest.json",
   "./masareefy-logo.svg", "./icon-192.png", "./icon-512.png"];
 

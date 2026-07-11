@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Masareefy مصاريفي 💰</title>
-<meta name="theme-color" content="#3c1053">
+<meta name="theme-color" content="#0d3d30">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><defs><linearGradient id='g' x1='0' y1='1' x2='1' y2='0'><stop offset='0' stop-color='%235a1d75'/><stop offset='1' stop-color='%23c86dd7'/></linearGradient><linearGradient id='gl' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%235fe08a'/><stop offset='1' stop-color='%232f9e44'/></linearGradient></defs><path d='M22 92 C40 90 52 74 62 58 C70 45 78 34 92 28' fill='none' stroke='url(%23g)' stroke-width='9' stroke-linecap='round'/><path d='M78 26 L95 24 L94 42' fill='none' stroke='url(%23g)' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/><path d='M40 78 C40 64 50 56 64 55 C63 70 54 79 40 78 Z' fill='url(%23gl)'/></svg>">
+<link rel="icon" href="icon-192.png">
 <style>
   :root{
     --grad-main: linear-gradient(135deg,#3c1053 0%,#7b2a8e 50%,#c86dd7 100%);
@@ -40,10 +40,12 @@
     box-shadow:0 25px 60px rgba(0,0,0,.35); text-align:center; animation:pop .4s ease;}
   @keyframes pop{from{transform:scale(.9); opacity:0} to{transform:scale(1); opacity:1}}
   .login-box h1{font-size:1.6rem; margin-bottom:4px;}
-  .logo-login{width:96px; height:96px; display:block; margin:0 auto 10px;
-    filter:drop-shadow(0 6px 14px rgba(90,29,117,.28));}
-  .logo-top{width:38px; height:38px; flex-shrink:0;}
-  header.topbar h1{display:flex; align-items:center; gap:9px;}
+  .logo-login{width:100%; max-width:280px; height:auto; display:block; margin:0 auto 14px;
+    border-radius:16px; filter:drop-shadow(0 8px 18px rgba(0,0,0,.12));}
+  .logo-top{height:44px; width:44px; object-fit:cover; display:block; border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,.22);}
+  .brand-word{font-weight:800;}
+  header.topbar h1{display:flex; align-items:center; gap:11px;}
   .login-box p.sub{color:var(--muted); margin-bottom:22px; font-size:.9rem;}
   .hint{background:#fff6d9; border:1px dashed #e5b800; color:#8a6d00; border-radius:10px; padding:8px 10px; font-size:.8rem; margin-bottom:16px;}
 
@@ -73,10 +75,16 @@
   header.topbar h1{color:#fff; font-size:1.3rem; text-shadow:0 2px 8px rgba(0,0,0,.25);}
   header.topbar .who{color:#fff; opacity:.85; font-size:.85rem;}
 
-  nav.tabs{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px;}
-  nav.tabs button{flex:1; min-width:110px; border:none; border-radius:14px; padding:12px; font-weight:700; font-size:.95rem;
-    cursor:pointer; background:rgba(255,255,255,.25); color:#fff; transition:all .2s;}
-  nav.tabs button.active{background:#fff; color:var(--accent); box-shadow:0 6px 18px rgba(0,0,0,.2);}
+  nav.tabs{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;}
+  nav.tabs button{flex:1; min-width:110px; border:1px solid rgba(255,255,255,.28); border-radius:16px; padding:13px 10px;
+    font-weight:800; font-size:.95rem; cursor:pointer; color:#fff; transition:transform .12s, box-shadow .12s, background .2s;
+    background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,.12));
+    box-shadow:0 5px 0 rgba(0,0,0,.20), 0 9px 16px rgba(0,0,0,.22), inset 0 1px 1px rgba(255,255,255,.35);}
+  nav.tabs button:hover{transform:translateY(-1px);}
+  nav.tabs button:active{transform:translateY(4px); box-shadow:0 1px 0 rgba(0,0,0,.20), 0 3px 8px rgba(0,0,0,.20);}
+  nav.tabs button.active{color:var(--accent); border-color:rgba(255,255,255,.6);
+    background:linear-gradient(180deg,#ffffff,#eef1ee);
+    box-shadow:0 5px 0 rgba(0,0,0,.16), 0 11px 20px rgba(0,0,0,.28), inset 0 1px 2px rgba(255,255,255,.9);}
 
   .panel{display:none; animation:fade .3s ease;}
   .panel.active{display:block;}
@@ -298,10 +306,16 @@
   /* ---------- MOBILE APP LAYOUT ---------- */
   @media(max-width:760px){
     .app{padding:14px 12px 110px;}
-    nav.tabs{position:fixed; bottom:0; left:0; right:0; z-index:44; margin:0; gap:2px; padding:8px 6px 10px;
-      background:#ffffff; border-radius:20px 20px 0 0; box-shadow:0 -8px 24px rgba(0,0,0,.18);}
-    nav.tabs button{min-width:0; padding:9px 2px; font-size:.68rem; border-radius:12px; color:var(--muted); background:transparent;}
-    nav.tabs button.active{background:var(--accent); color:#fff; box-shadow:none;}
+    nav.tabs{position:fixed; bottom:0; left:0; right:0; z-index:44; margin:0; gap:5px; padding:9px 7px 11px;
+      background:#ffffff; border-radius:22px 22px 0 0; box-shadow:0 -8px 24px rgba(0,0,0,.18);}
+    nav.tabs button{min-width:0; padding:8px 2px; font-size:.66rem; border-radius:14px; color:var(--muted);
+      border:1px solid rgba(0,0,0,.05);
+      background:linear-gradient(180deg,#ffffff,#eceff2);
+      box-shadow:0 3px 0 rgba(0,0,0,.08), 0 4px 8px rgba(0,0,0,.10), inset 0 1px 1px rgba(255,255,255,.9);}
+    nav.tabs button:active{transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.08);}
+    nav.tabs button.active{color:#fff; border-color:transparent;
+      background:linear-gradient(180deg,var(--accent),color-mix(in srgb,var(--accent) 72%,#000));
+      box-shadow:0 3px 0 rgba(0,0,0,.22), 0 6px 12px rgba(0,0,0,.24), inset 0 1px 1px rgba(255,255,255,.3);}
     .fab{bottom:86px;}
     .stats{grid-template-columns:1fr 1fr;}
   }
@@ -319,20 +333,8 @@
 <!-- ================= LOGIN ================= -->
 <div class="login-wrap" id="loginScreen">
   <div class="login-box">
-    <svg class="logo-login" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Masareefy logo">
-      <defs>
-        <linearGradient id="lgMain" x1="0" y1="1" x2="1" y2="0">
-          <stop offset="0" stop-color="#5a1d75"/><stop offset="1" stop-color="#c86dd7"/>
-        </linearGradient>
-        <linearGradient id="lgLeaf" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#5fe08a"/><stop offset="1" stop-color="#2f9e44"/>
-        </linearGradient>
-      </defs>
-      <path d="M22 92 C40 90 52 74 62 58 C70 45 78 34 92 28" fill="none" stroke="url(#lgMain)" stroke-width="9" stroke-linecap="round"/>
-      <path d="M78 26 L95 24 L94 42" fill="none" stroke="url(#lgMain)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M40 78 C40 64 50 56 64 55 C63 70 54 79 40 78 Z" fill="url(#lgLeaf)"/>
-    </svg>
-    <h1 data-i18n="appTitle">Masareefy</h1>
+    <img class="logo-login" id="loginLogo" src="logo-en.jpg" alt="Masareefy">
+    <h1 data-i18n="appTitle" style="display:none">Masareefy</h1>
     <p class="sub" id="loginSub" data-i18n="signInSub">Please sign in to continue</p>
     <form id="loginForm" onsubmit="return doLogin(event)">
       <label data-i18n="userId">User ID</label>
@@ -357,16 +359,7 @@
 <div class="app" id="appScreen">
   <header class="topbar">
     <div>
-      <h1><svg class="logo-top" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <defs>
-          <linearGradient id="lgLeafT" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#8affb0"/><stop offset="1" stop-color="#43c06a"/>
-          </linearGradient>
-        </defs>
-        <path d="M22 92 C40 90 52 74 62 58 C70 45 78 34 92 28" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>
-        <path d="M78 26 L95 24 L94 42" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M40 78 C40 64 50 56 64 55 C63 70 54 79 40 78 Z" fill="url(#lgLeafT)"/>
-      </svg><span data-i18n="appTitle">Masareefy</span></h1>
+      <h1><img class="logo-top" src="icon-192.png" alt="Masareefy"><span class="brand-word" data-i18n="appTitle">Masareefy</span></h1>
       <div class="who" id="whoami"></div>
     </div>
     <button class="btn small ghost" onclick="logout()" data-i18n="logout">Logout 🚪</button>
@@ -749,6 +742,8 @@ const SOURCES = [
   {name:"Other",      ar:"أخرى",        color:"#8395a7", icon:"📦"}
 ];
 const THEMES = [
+  {id:"masareefy", name:"Masareefy Green",   ar:"مصاريفي",        c:["#0d3d30","#1f7a58","#c2a63c"], accent:"#1f7a58",
+   stats:[["#0d3d30","#1f7a58"],["#166348","#2e9d70"],["#1f7a58","#3aa87c"],["#0a2e24","#166348"]]},
   {id:"amethyst", name:"Amethyst",          ar:"جمشت",          c:["#3c1053","#7b2a8e","#c86dd7"], accent:"#7b2a8e",
    stats:[["#3c1053","#7b2a8e"],["#7b2a8e","#c86dd7"],["#5a1d75","#a94bbf"],["#2b0a3d","#5a1d75"]]},
   {id:"oceanpearl", name:"Ocean Pearl",     ar:"لؤلؤ المحيط",   c:["#05445e","#189ab4","#75e6da"], accent:"#128194",
@@ -973,8 +968,8 @@ function lsGet(key,fallback){ try{ const v=JSON.parse(localStorage.getItem(key))
 function loadUsers(){ return lsGet(LS_USERS,[]); }
 function saveUsers(u){ localStorage.setItem(LS_USERS,JSON.stringify(u)); }
 function loadSettings(){
-  const s=Object.assign({lang:"en",theme:"amethyst",chartView:"bars"}, lsGet(LS_SETTINGS,{}));
-  if(!THEMES.find(t=>t.id===s.theme)) s.theme="amethyst";
+  const s=Object.assign({lang:"en",theme:"masareefy",chartView:"bars"}, lsGet(LS_SETTINGS,{}));
+  if(!THEMES.find(t=>t.id===s.theme)) s.theme="masareefy";
   return s;
 }
 function saveSettings(){ localStorage.setItem(LS_SETTINGS,JSON.stringify(settings)); }
@@ -1073,6 +1068,7 @@ function applyI18n(){
   document.documentElement.lang=settings.lang;
   document.documentElement.dir=settings.lang==="ar"?"rtl":"ltr";
   document.title=t("appTitle")+" 💰";
+  const ll=document.getElementById("loginLogo"); if(ll) ll.src=settings.lang==="ar"?"logo-ar.jpg":"logo-en.jpg";
   document.getElementById("langBtn").textContent=settings.lang==="ar"?"English":"عربي";
   document.querySelectorAll("[data-i18n]").forEach(el=>{ el.innerHTML=t(el.dataset.i18n); });
   document.querySelectorAll("[data-i18n-ph]").forEach(el=>{ el.placeholder=t(el.dataset.i18nPh); });
@@ -2160,8 +2156,19 @@ function fillDropdowns(){
   });
 }
 function refreshAll(){ renderDash(); renderReport(); renderIncome(); renderBills(); renderGoals(); renderInsightsTab(); }
+/* one-time rebrand: adopt the new Masareefy Green theme for everyone who
+   was still on the old default, so the app matches the new logo */
+(function rebrandTheme(){
+  if(localStorage.getItem("hala_brand_v2")) return;
+  if(settings.theme==="amethyst"){ settings.theme="masareefy"; saveSettings(); }
+  const users=loadUsers();
+  let changed=false;
+  users.forEach(u=>{ if(u.theme==="amethyst"||!u.theme){ delete u.theme; changed=true; } });
+  if(changed) saveUsers(users);
+  localStorage.setItem("hala_brand_v2","1");
+})();
 (function init(){
-  applyTheme(settings.theme);
+  applyTheme(currentTheme?currentTheme():settings.theme);
   applyI18n();
   document.getElementById("fDate").value=todayStr();
   document.getElementById("iDate").value=todayStr();
