@@ -227,8 +227,10 @@
   body.light .month-nav span{color:var(--ink); text-shadow:none;}
   body.light .month-nav button{background:#fff; color:var(--accent); box-shadow:0 3px 8px rgba(0,0,0,.08);}
   .fab{position:fixed; bottom:26px; inset-inline-end:26px; z-index:45; width:60px; height:60px; border-radius:50%;
-    border:none; background:var(--grad-main); color:#fff; font-size:1.9rem; line-height:1; cursor:pointer;
+    border:none; background:var(--grad-main); color:#fff; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; padding:0;
     box-shadow:0 10px 26px rgba(0,0,0,.35); transition:transform .15s;}
+  .fab svg{width:26px; height:26px; display:block;}
   .fab:hover{transform:scale(1.1);}
 
   /* ---------- BUDGET RING ---------- */
@@ -344,6 +346,22 @@
     .stats{grid-template-columns:1fr 1fr;}
   }
 
+  /* ---------- ASSISTANT / CHAT ---------- */
+  .assistant-card{border:2px solid color-mix(in srgb,var(--accent) 30%,transparent);}
+  .chat-log{display:flex; flex-direction:column; gap:10px; max-height:340px; overflow-y:auto; margin-bottom:12px;}
+  .chat-log:empty{margin-bottom:0;}
+  .chat-msg{max-width:85%; padding:10px 14px; border-radius:16px; font-size:.9rem; line-height:1.55; white-space:pre-wrap;}
+  .chat-msg.user{align-self:flex-end; background:var(--accent); color:#fff; border-end-end-radius:5px;}
+  .chat-msg.bot{align-self:flex-start; background:#f3f0ea; color:var(--ink); border-end-start-radius:5px;}
+  .chat-msg.bot b{color:var(--accent);}
+  .chat-suggest{display:flex; flex-wrap:wrap; gap:7px; margin-bottom:12px;}
+  .chat-suggest button{border:1.5px solid #e3e0f0; background:#fff; color:var(--accent); border-radius:20px;
+    padding:6px 13px; font-size:.8rem; font-weight:700; cursor:pointer; transition:all .12s;}
+  .chat-suggest button:hover{background:var(--accent); color:#fff; border-color:transparent;}
+  .chat-input{display:flex; gap:8px;}
+  .chat-input input{margin:0; flex:1;}
+  .chat-input .btn{padding:12px 18px;}
+
   /* ---------- SETTINGS LIST ---------- */
   .set-list{display:flex; flex-direction:column;}
   .set-row{display:flex; align-items:center; gap:12px; padding:12px 4px; border-bottom:1px solid #eeeaf2;}
@@ -437,6 +455,15 @@
 
   <!-- ---- INSIGHTS ---- -->
   <section class="panel" id="tab-insights">
+    <div class="card assistant-card">
+      <h2 data-i18n="assistantTitle">🤖 Ask Masareefy</h2>
+      <div class="chat-log" id="chatLog"></div>
+      <div class="chat-suggest" id="chatSuggest"></div>
+      <form class="chat-input" onsubmit="return askSubmit(event)">
+        <input id="chatInput" data-i18n-ph="askPh" autocomplete="off">
+        <button class="btn" type="submit" aria-label="Send">➤</button>
+      </form>
+    </div>
     <div class="addseg">
       <button id="insSegOv" class="active" onclick="setInsSeg('ov')" data-i18n="segOverview">Overview</button>
       <button id="insSegTr" onclick="setInsSeg('tr')" data-i18n="segTrends">Trends</button>
@@ -766,7 +793,9 @@
   </section>
 </div>
 
-<button class="fab" id="fab" style="display:none" onclick="showTab('add')" title="Add">➕</button>
+<button class="fab" id="fab" style="display:none" onclick="showTab('add')" title="Add" aria-label="Add">
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+</button>
 <div id="toast"></div>
 
 <script>
@@ -960,7 +989,36 @@ en:{
   tabBuckets:"🪣 Buckets", budgetsSeg:"💰 Budgets", goalsSeg:"🎯 Goals",
   subsSeg:"🔁 Subscriptions", instSeg:"📆 Installments", incomeSeg:"💵 Income",
   chooseIcon:"Choose an icon", chooseColor:"Choose a color",
-  prefsTitle:"⚙️ Preferences", languageLbl:"Language", currencyLbl:"Currency", currencySet:"💱 Currency set to"
+  prefsTitle:"⚙️ Preferences", languageLbl:"Language", currencyLbl:"Currency", currencySet:"💱 Currency set to",
+  assistantTitle:"🤖 Ask Masareefy", askPh:"Ask about your money…",
+  askChips:["How much did I spend this month?","What's my biggest category?","How am I doing on budget?","Can I afford 50?","My subscriptions total","Give me advice"],
+  aNoData:"I don't have any expenses recorded this month yet. Add a few and ask me again! 📊",
+  aNoSpend:"You haven't recorded any spending this month yet. 🎉",
+  aSpent:a=>"This month you've spent <b>"+a+"</b>.", aSpentTop:c=>"Your top category is "+c+".",
+  aTopCat:(c,a,p)=>"Your biggest category this month is <b>"+c+"</b> at "+a+" ("+p+"% of your spending).",
+  aTopExp:"Your biggest expenses this month:",
+  aIncome:a=>"Your income this month is <b>"+a+"</b>.", aIncomeNone:"You haven't recorded any income this month yet.",
+  aBalanceNoIncome:a=>"You've spent <b>"+a+"</b> this month, but no income is recorded — add your income for the full picture.",
+  aSavedPos:(a,p)=>"You're in the green 🎉 — you've kept <b>"+a+"</b> this month, about "+p+"% of your income.",
+  aSavedNeg:(a,p)=>"⚠️ You've spent <b>"+a+"</b> more than your income this month. Time to ease off a little.",
+  aBills:(a,n)=>"Your monthly bills total <b>"+a+"</b> across "+n+" active items (subscriptions + installments).",
+  aBudgetTotal:(s,b,p)=>"You've used <b>"+s+"</b> of your <b>"+b+"</b> monthly budget ("+p+"%).",
+  aOver:"Over budget:", aNear:"Getting close (80%+):",
+  aBudgetNone:"You haven't set any budgets yet. You can add them in Buckets → Budgets.",
+  aAffordNoData:"Set an overall monthly budget or add your income first, and I can tell you what's safe to spend.",
+  aAffordYes:(a,l)=>"Yes 👍 — "+a+" fits within your remaining "+l+" for this month.",
+  aAffordNo:(a,l)=>"Careful ⚠️ — "+a+" is more than the "+l+" you have left this month.",
+  aGreeting:"Hi! 👋 I'm your Masareefy assistant. Ask me things like \"how much did I spend?\", \"what's my biggest category?\", or \"give me advice\".",
+  aFallback:"I can answer questions about your spending, income, budgets, bills, and savings — try one of the suggestions above, or ask \"give me advice\".",
+  adOverspend:a=>"⚠️ You spent "+a+" more than you earned this month. Try trimming your top category next month.",
+  adLowSave:p=>"💡 You're saving about "+p+"% of your income. Aiming for 20% is a healthy target — automate a fixed amount into a savings goal.",
+  adGoodSave:p=>"🎉 Great job — you're saving about "+p+"% of your income this month. Keep it up!",
+  adBigCat:(c,p)=>"🎯 "+c+" is "+p+"% of your spending. Setting a budget for it in Buckets could help keep it in check.",
+  adSubs:(a,p)=>"🔁 Your subscriptions cost "+a+" a month ("+p+"% of income). Review the Bills tab and cancel any you don't use.",
+  adOverBudget:l=>"🚨 You're over budget in: "+l+". Consider slowing down there for the rest of the month.",
+  adGoal:(n,p)=>"🌙 You're "+p+"% of the way to your \""+n+"\" goal — adding a little each week keeps the momentum.",
+  adStart:"💡 Add a few expenses and set a budget, and I'll give you tailored advice on where to save.",
+  adDisclaimer:"—\nℹ️ This is general guidance based on your own numbers, not professional financial advice."
 },
 ar:{
   appTitle:"مصاريفي", signInSub:"الرجاء تسجيل الدخول للمتابعة",
@@ -1057,7 +1115,36 @@ ar:{
   tabBuckets:"🪣 السلال", budgetsSeg:"💰 الميزانيات", goalsSeg:"🎯 الأهداف",
   subsSeg:"🔁 الاشتراكات", instSeg:"📆 الأقساط", incomeSeg:"💵 الدخل",
   chooseIcon:"اختر أيقونة", chooseColor:"اختر لوناً",
-  prefsTitle:"⚙️ التفضيلات", languageLbl:"اللغة", currencyLbl:"العملة", currencySet:"💱 تم ضبط العملة إلى"
+  prefsTitle:"⚙️ التفضيلات", languageLbl:"اللغة", currencyLbl:"العملة", currencySet:"💱 تم ضبط العملة إلى",
+  assistantTitle:"🤖 اسأل مصاريفي", askPh:"اسأل عن أموالك…",
+  askChips:["كم أنفقت هذا الشهر؟","ما أكبر فئة عندي؟","كيف حالي مع الميزانية؟","هل أقدر أصرف ٥٠؟","إجمالي اشتراكاتي","أعطني نصيحة"],
+  aNoData:"لا توجد مصاريف مسجلة هذا الشهر بعد. أضف بعضها واسألني مجدداً! 📊",
+  aNoSpend:"لم تسجّل أي مصاريف هذا الشهر بعد. 🎉",
+  aSpent:a=>"أنفقت هذا الشهر <b>"+a+"</b>.", aSpentTop:c=>"أكبر فئة لديك هي "+c+".",
+  aTopCat:(c,a,p)=>"أكبر فئة هذا الشهر هي <b>"+c+"</b> بمبلغ "+a+" ("+p+"% من مصاريفك).",
+  aTopExp:"أكبر مصاريفك هذا الشهر:",
+  aIncome:a=>"دخلك هذا الشهر هو <b>"+a+"</b>.", aIncomeNone:"لم تسجّل أي دخل هذا الشهر بعد.",
+  aBalanceNoIncome:a=>"أنفقت <b>"+a+"</b> هذا الشهر، لكن لا يوجد دخل مسجّل — أضف دخلك لرؤية الصورة كاملة.",
+  aSavedPos:(a,p)=>"أنت في المنطقة الخضراء 🎉 — وفّرت <b>"+a+"</b> هذا الشهر، حوالي "+p+"% من دخلك.",
+  aSavedNeg:(a,p)=>"⚠️ أنفقت <b>"+a+"</b> أكثر من دخلك هذا الشهر. حان وقت التخفيف قليلاً.",
+  aBills:(a,n)=>"إجمالي فواتيرك الشهرية <b>"+a+"</b> عبر "+n+" التزاماً نشطاً (اشتراكات + أقساط).",
+  aBudgetTotal:(s,b,p)=>"استخدمت <b>"+s+"</b> من ميزانيتك الشهرية <b>"+b+"</b> ("+p+"%).",
+  aOver:"تجاوزت الميزانية في:", aNear:"اقتربت (٨٠٪+):",
+  aBudgetNone:"لم تحدد أي ميزانيات بعد. يمكنك إضافتها من السلال ← الميزانيات.",
+  aAffordNoData:"حدّد ميزانية شهرية إجمالية أو أضف دخلك أولاً، وسأخبرك بما يمكنك إنفاقه بأمان.",
+  aAffordYes:(a,l)=>"نعم 👍 — مبلغ "+a+" يقع ضمن المتبقي لديك "+l+" لهذا الشهر.",
+  aAffordNo:(a,l)=>"انتبه ⚠️ — مبلغ "+a+" أكبر من المتبقي لديك "+l+" لهذا الشهر.",
+  aGreeting:"أهلاً! 👋 أنا مساعد مصاريفي. اسألني أشياء مثل «كم أنفقت؟» أو «ما أكبر فئة؟» أو «أعطني نصيحة».",
+  aFallback:"يمكنني الإجابة عن أسئلة حول مصاريفك ودخلك وميزانياتك وفواتيرك ومدخراتك — جرّب أحد الاقتراحات بالأعلى أو اسأل «أعطني نصيحة».",
+  adOverspend:a=>"⚠️ أنفقت "+a+" أكثر من دخلك هذا الشهر. حاول تقليل أكبر فئة الشهر القادم.",
+  adLowSave:p=>"💡 توفّر حوالي "+p+"% من دخلك. استهداف ٢٠٪ هدف صحي — حوّل مبلغاً ثابتاً تلقائياً إلى هدف ادخار.",
+  adGoodSave:p=>"🎉 أحسنت — توفّر حوالي "+p+"% من دخلك هذا الشهر. استمر!",
+  adBigCat:(c,p)=>"🎯 "+c+" تمثل "+p+"% من مصاريفك. تحديد ميزانية لها في السلال قد يساعد في ضبطها.",
+  adSubs:(a,p)=>"🔁 اشتراكاتك تكلّف "+a+" شهرياً ("+p+"% من الدخل). راجع الالتزامات وألغِ ما لا تستخدمه.",
+  adOverBudget:l=>"🚨 تجاوزت الميزانية في: "+l+". يُفضّل التخفيف هناك لبقية الشهر.",
+  adGoal:(n,p)=>"🌙 أنجزت "+p+"% من هدف «"+n+"» — إضافة القليل أسبوعياً يحافظ على الزخم.",
+  adStart:"💡 أضف بعض المصاريف وحدّد ميزانية، وسأعطيك نصائح مخصّصة حول أين توفّر.",
+  adDisclaimer:"—\nℹ️ هذه إرشادات عامة مبنية على أرقامك، وليست نصيحة مالية احترافية."
 }};
 
 /* ================= STORAGE ================= */
@@ -1295,7 +1382,7 @@ function enterApp(u){
   viewDate=new Date();
   document.getElementById("loginScreen").style.display="none";
   document.getElementById("appScreen").style.display="block";
-  document.getElementById("fab").style.display="block";
+  document.getElementById("fab").style.display="flex";
   document.getElementById("adminCard").style.display=u.owner?"block":"none";
   applyTheme(currentTheme());
   fillDropdowns(); setWhoami(); buildBudgetGrid(); renderThemeGrid(); renderUsers(); renderCustomCats(); refreshAll();
@@ -1531,6 +1618,7 @@ function activeInsSeg(){
   return "ov";
 }
 function renderInsightsTab(){
+  renderChatSuggest();
   const mPrefix=monthPrefix(viewDate);
   const agg=monthAgg(mPrefix);
   const seg=activeInsSeg();
@@ -1807,6 +1895,127 @@ function renderMonthChart(){
       '<div class="mbar" style="height:'+Math.max(3,h)+'px"></div>'+
       '<div class="mlbl">'+m.date.toLocaleDateString(locale,{month:"short"})+"</div></div>";
   }).join("")+"</div>";
+}
+
+/* ================= ASSISTANT ================= */
+function renderChatSuggest(){
+  const el=document.getElementById("chatSuggest");
+  if(!el) return;
+  el.innerHTML=t("askChips").map(q=>'<button type="button" onclick="quickAsk(this.textContent)">'+esc(q)+"</button>").join("");
+}
+function askSubmit(e){
+  e.preventDefault();
+  const inp=document.getElementById("chatInput");
+  const q=inp.value.trim();
+  if(!q) return false;
+  inp.value="";
+  quickAsk(q);
+  return false;
+}
+function quickAsk(q){
+  const log=document.getElementById("chatLog");
+  log.insertAdjacentHTML("beforeend",'<div class="chat-msg user">'+esc(q)+"</div>");
+  const ans=assistantAnswer(q);
+  log.insertAdjacentHTML("beforeend",'<div class="chat-msg bot">'+ans+"</div>");
+  log.scrollTop=log.scrollHeight;
+}
+function pctOf(a,b){ return b>0?Math.round(a/b*100):0; }
+function assistantAnswer(q){
+  const s=" "+q.toLowerCase()+" ";
+  const now=new Date(), mp=monthPrefix(now);
+  const agg=monthAgg(mp);
+  const inc=incomeMonthTotal(mp);
+  const net=inc-agg.total;
+  const cats=Object.entries(agg.byCat).sort((a,b)=>b[1]-a[1]);
+  const has=(...ws)=>ws.some(w=>s.includes(w));
+  const numMatch=q.replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).match(/(\d+(?:\.\d+)?)/);
+  const num=numMatch?parseFloat(numMatch[1]):null;
+
+  /* can I afford X? */
+  if(num!==null && has("afford","can i","اقدر","أقدر","أتحمل","اتحمل")){
+    const budget=loadTotalBudget();
+    const left=budget>0?budget-agg.total:(inc>0?net:null);
+    if(left===null) return t("aAffordNoData");
+    return (num<=left?t("aAffordYes"):t("aAffordNo"))(fmtKD(num),fmtKD(Math.abs(left)));
+  }
+  /* subscriptions / bills total */
+  if(has("subscription","subscriptions","bills","commitment","اشتراك","التزام","فواتير")){
+    const commit=subs.reduce((a,x)=>a+x.amt,0)+inst.filter(x=>x.paid<x.total).reduce((a,x)=>a+x.amt,0);
+    return t("aBills")(fmtKD(commit),subs.length+inst.filter(x=>x.paid<x.total).length);
+  }
+  /* budget status */
+  if(has("budget","ميزانية","تجاوزت")){
+    const tb=loadTotalBudget(), b=loadBudgets();
+    let out="";
+    if(tb>0) out+=t("aBudgetTotal")(fmtKD(agg.total),fmtKD(tb),pctOf(agg.total,tb))+"\n";
+    const over=[],near=[];
+    for(const [c,lim] of Object.entries(b)){ const sp=agg.byCat[c]||0; if(lim>0&&sp>=lim) over.push(catLabel(c)); else if(lim>0&&sp>=lim*0.8) near.push(catLabel(c)); }
+    if(over.length) out+="🚨 "+t("aOver")+" "+over.join("، ")+"\n";
+    if(near.length) out+="⏳ "+t("aNear")+" "+near.join("، ")+"\n";
+    if(!out) return t("aBudgetNone");
+    return out.trim();
+  }
+  /* income */
+  if(has("income","earn","salary","دخل","راتب","كسبت")){
+    return inc>0?t("aIncome")(fmtKD(inc)):t("aIncomeNone");
+  }
+  /* balance / saved / net */
+  if(has("balance","saved","save","left","net","رصيد","وفرت","تبقى","صافي")){
+    if(inc<=0) return t("aBalanceNoIncome")(fmtKD(agg.total));
+    return (net>=0?t("aSavedPos"):t("aSavedNeg"))(fmtKD(Math.abs(net)),pctOf(Math.abs(net),inc));
+  }
+  /* top / biggest expenses */
+  if(has("top expense","biggest expense","largest","most expensive","أكبر مصروف","أغلى")){
+    const list=expenses.filter(x=>x.date.startsWith(mp)).sort((a,b)=>b.amt-a.amt).slice(0,3);
+    if(!list.length) return t("aNoData");
+    return t("aTopExp")+"\n"+list.map((x,i)=>(i+1)+". "+catIcon(x.cat)+" "+esc(x.desc||catLabel(x.cat))+" — <b>"+fmtKD(x.amt)+"</b>").join("\n");
+  }
+  /* biggest category / where money goes */
+  if(has("categor","where","most","biggest","فئة","أين","وين","أكثر")){
+    if(!cats.length) return t("aNoData");
+    const [c,v]=cats[0];
+    return t("aTopCat")(catIcon(c)+" "+catLabel(c),fmtKD(v),pctOf(v,agg.total));
+  }
+  /* spending this month */
+  if(has("spend","spent","spending","total","how much","أنفقت","صرفت","مصاريف","كم")){
+    if(agg.total<=0) return t("aNoSpend");
+    const top=cats.length?catIcon(cats[0][0])+" "+catLabel(cats[0][0]):"";
+    return t("aSpent")(fmtKD(agg.total))+(top?" "+t("aSpentTop")(top):"");
+  }
+  /* advice / tips */
+  if(has("advice","advise","tip","help","recommend","improve","نصيحة","نصائح","ساعد","حسّن")){
+    return generateAdvice().join("\n\n");
+  }
+  /* greeting */
+  if(has(" hi "," hello "," hey ","سلام","مرحبا","اهلا","أهلا")){
+    return t("aGreeting");
+  }
+  return t("aFallback");
+}
+function generateAdvice(){
+  const now=new Date(), mp=monthPrefix(now);
+  const agg=monthAgg(mp), inc=incomeMonthTotal(mp), net=inc-agg.total;
+  const cats=Object.entries(agg.byCat).sort((a,b)=>b[1]-a[1]);
+  const tips=[];
+  if(inc>0){
+    const rate=pctOf(net,inc);
+    if(net<0) tips.push(t("adOverspend")(fmtKD(-net)));
+    else if(rate<10) tips.push(t("adLowSave")(rate));
+    else tips.push(t("adGoodSave")(rate));
+  }
+  if(cats.length && agg.total>0){
+    const [c,v]=cats[0], p=pctOf(v,agg.total);
+    if(p>=40) tips.push(t("adBigCat")(catLabel(c),p));
+  }
+  const commit=subs.reduce((a,x)=>a+x.amt,0);
+  if(inc>0 && commit>0 && pctOf(commit,inc)>=15) tips.push(t("adSubs")(fmtKD(commit),pctOf(commit,inc)));
+  const b=loadBudgets();
+  const over=Object.entries(b).filter(([c,l])=>l>0&&(agg.byCat[c]||0)>=l).map(([c])=>catLabel(c));
+  if(over.length) tips.push(t("adOverBudget")(over.join("، ")));
+  if(goals.length){ const g=goals.find(x=>x.saved<x.target); if(g) tips.push(t("adGoal")(esc(g.name),pctOf(g.saved,g.target))); }
+  if(!tips.length) tips.push(t("adStart"));
+  tips.push(t("adDisclaimer"));
+  return tips;
 }
 
 /* ================= REPORT ================= */
