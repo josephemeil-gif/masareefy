@@ -40,8 +40,7 @@
     box-shadow:0 25px 60px rgba(0,0,0,.35); text-align:center; animation:pop .4s ease;}
   @keyframes pop{from{transform:scale(.9); opacity:0} to{transform:scale(1); opacity:1}}
   .login-box h1{font-size:1.6rem; margin-bottom:4px;}
-  .logo-login{width:100%; max-width:280px; height:auto; display:block; margin:0 auto 14px;
-    border-radius:16px; filter:drop-shadow(0 8px 18px rgba(0,0,0,.12));}
+  .logo-login{width:100%; max-width:300px; height:auto; display:block; margin:2px auto 16px;}
   .logo-top{height:44px; width:44px; object-fit:cover; display:block; border-radius:12px;
     box-shadow:0 4px 12px rgba(0,0,0,.22);}
   .brand-word{font-weight:800;}
@@ -259,6 +258,17 @@
   .goal-head .g-name{font-weight:800; flex:1;}
   .goal-add{display:flex; gap:8px; margin-top:10px; align-items:center;}
   .goal-add input{margin-bottom:0; max-width:140px; padding:8px 10px;}
+  .g-icon{width:40px; height:40px; font-size:1.35rem;}
+  .icon-pick{display:flex; flex-wrap:wrap; gap:7px; margin:4px 0 14px;}
+  .ic-opt{width:42px; height:42px; border-radius:12px; border:2px solid #e3e0f0; background:#fff; font-size:1.25rem;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .12s;}
+  .ic-opt:hover{transform:translateY(-1px);}
+  .ic-opt.sel{border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent);}
+  .color-pick{display:flex; flex-wrap:wrap; gap:9px; margin:4px 0 6px;}
+  .col-opt{width:34px; height:34px; border-radius:50%; border:3px solid #fff; cursor:pointer;
+    box-shadow:0 2px 6px rgba(0,0,0,.2); transition:transform .12s;}
+  .col-opt:hover{transform:scale(1.1);}
+  .col-opt.sel{outline:3px solid var(--accent); outline-offset:2px;}
 
   /* ---------- FILTER CHIPS ---------- */
   .chip-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
@@ -333,7 +343,7 @@
 <!-- ================= LOGIN ================= -->
 <div class="login-wrap" id="loginScreen">
   <div class="login-box">
-    <img class="logo-login" id="loginLogo" src="logo-en.jpg" alt="Masareefy">
+    <img class="logo-login" id="loginLogo" src="logo-en.png" alt="Masareefy">
     <h1 data-i18n="appTitle" style="display:none">Masareefy</h1>
     <p class="sub" id="loginSub" data-i18n="signInSub">Please sign in to continue</p>
     <form id="loginForm" onsubmit="return doLogin(event)">
@@ -368,7 +378,7 @@
   <nav class="tabs">
     <button class="active" data-tab="dash" onclick="showTab('dash')" data-i18n="tabDash">📊 Dashboard</button>
     <button data-tab="bills" onclick="showTab('bills')" data-i18n="tabBills">💳 Bills</button>
-    <button data-tab="goals" onclick="showTab('goals')" data-i18n="tabGoals">🎯 Goals</button>
+    <button data-tab="buckets" onclick="showTab('buckets')" data-i18n="tabBuckets">🪣 Buckets</button>
     <button data-tab="insights" onclick="showTab('insights')" data-i18n="tabInsights">🧠 Insights</button>
     <button data-tab="report" onclick="showTab('report')" data-i18n="tabReport">📋 Reports</button>
     <button data-tab="settings" onclick="showTab('settings')" data-i18n="tabSettings">⚙️ Settings</button>
@@ -456,12 +466,8 @@
   <section class="panel" id="tab-add">
     <div class="card">
       <div class="card-head">
-        <h2 data-i18n="addPanelTitle">➕ Add</h2>
+        <h2 data-i18n="addPanelTitle">➕ Add Expense</h2>
         <button class="btn small ghost" onclick="showTab('dash')">✕</button>
-      </div>
-      <div class="addseg">
-        <button id="segExp" class="active" onclick="setAddMode('exp')" data-i18n="addExpenseSeg">Expense</button>
-        <button id="segInc" onclick="setAddMode('inc')" data-i18n="addIncomeSeg">Income</button>
       </div>
       <form id="formExpense" onsubmit="return addExpense(event)">
         <div class="grid2">
@@ -477,19 +483,10 @@
           <button class="voice-btn" type="button" id="voiceBtn" onclick="toggleVoice()" data-i18n="voiceBtn">🎤 Voice</button>
         </div>
       </form>
-      <form id="formIncome" style="display:none" onsubmit="return addIncome(event)">
-        <div class="grid2">
-          <div><label data-i18n="date">Date</label><input type="date" id="iDate" required></div>
-          <div><label data-i18n="amountKD">Amount (KD)</label><input type="number" id="iAmount" step="0.001" min="0.001" placeholder="0.000" required></div>
-          <div><label data-i18n="source">Source</label><select id="iSrc" required></select></div>
-          <div><label data-i18n="descOpt">Description (optional)</label><input type="text" id="iDesc" maxlength="120"></div>
-        </div>
-        <button class="btn green full" type="submit" data-i18n="saveIncome">Save Income 💾</button>
-      </form>
     </div>
   </section>
 
-  <!-- ---- BILLS ---- -->
+  <!-- ---- BILLS (Subscriptions / Installments / Income) ---- -->
   <section class="panel" id="tab-bills">
     <div class="commit-line">
       <span><span data-i18n="monthlyCommit">Monthly commitments</span>: <b id="commitTotal"></b></span>
@@ -497,58 +494,118 @@
       <span><span data-i18n="perYear">Per year</span>: <b id="commitYear"></b></span>
       <span><span data-i18n="dueWeek">Due this week</span>: <b id="commitDue"></b></span>
     </div>
-    <div class="card">
-      <h2 data-i18n="subsTitle">🔁 Subscriptions</h2>
-      <div id="subList"></div>
-      <label data-i18n="presetsLbl">Quick add:</label>
-      <div class="preset-grid" id="subPresets"></div>
-      <form onsubmit="return addSub(event)">
-        <input type="hidden" id="sbDomain">
-        <div class="grid3">
-          <div><label data-i18n="subName">Name</label><input type="text" id="sbName" maxlength="40" required oninput="document.getElementById('sbDomain').value=''"></div>
-          <div><label data-i18n="iconLbl">Icon (emoji)</label><input type="text" id="sbIcon" maxlength="4" placeholder="🔁"></div>
-          <div><label data-i18n="monthlyAmt">Monthly amount (KD)</label><input type="number" id="sbAmt" step="0.001" min="0.001" required></div>
-          <div><label data-i18n="renewDay">Renewal day (1–31)</label><input type="number" id="sbDay" min="1" max="31" value="1" required></div>
-          <div><label data-i18n="category">Category</label><select id="sbCat"></select></div>
-          <div><label data-i18n="paymentType">Payment Type</label><select id="sbPay"></select></div>
-          <div><label data-i18n="remindLbl">Remind me before renewal (days)</label>
-            <select id="sbRemind"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="7">7</option></select></div>
-        </div>
-        <button class="btn blue full" type="submit" data-i18n="addSubBtn">Add Subscription ➕</button>
-      </form>
+    <div class="addseg">
+      <button id="billSegSub" class="active" onclick="setBillSeg('sub')" data-i18n="subsSeg">🔁 Subscriptions</button>
+      <button id="billSegInst" onclick="setBillSeg('inst')" data-i18n="instSeg">📆 Installments</button>
+      <button id="billSegInc" onclick="setBillSeg('inc')" data-i18n="incomeSeg">💵 Income</button>
     </div>
-    <div class="card">
-      <h2 data-i18n="instTitle">📆 Installments</h2>
-      <div id="instList"></div>
-      <label data-i18n="presetsLbl">Quick add:</label>
-      <div class="preset-grid" id="instPresets"></div>
-      <form onsubmit="return addInst(event)">
-        <div class="grid3">
-          <div><label data-i18n="subName">Name</label><input type="text" id="inName" maxlength="40" required></div>
-          <div><label data-i18n="iconLbl">Icon (emoji)</label><input type="text" id="inIcon" maxlength="4" placeholder="📆"></div>
-          <div><label data-i18n="monthlyAmt">Monthly amount (KD)</label><input type="number" id="inAmt" step="0.001" min="0.001" required></div>
-          <div><label data-i18n="monthsTotal">Total months</label><input type="number" id="inTotal" min="1" max="120" required></div>
-          <div><label data-i18n="monthsPaid">Months already paid</label><input type="number" id="inPaid" min="0" max="120" value="0" required></div>
-          <div><label data-i18n="category">Category</label><select id="inCat"></select></div>
-          <div><label data-i18n="paymentType">Payment Type</label><select id="inPay"></select></div>
+    <div id="bill-sub">
+      <div class="card">
+        <h2 data-i18n="subsTitle">🔁 Subscriptions</h2>
+        <div id="subList"></div>
+        <label data-i18n="presetsLbl">Quick add:</label>
+        <div class="preset-grid" id="subPresets"></div>
+        <form onsubmit="return addSub(event)">
+          <input type="hidden" id="sbDomain">
+          <div class="grid3">
+            <div><label data-i18n="subName">Name</label><input type="text" id="sbName" maxlength="40" required oninput="document.getElementById('sbDomain').value=''"></div>
+            <div><label data-i18n="iconLbl">Icon (emoji)</label><input type="text" id="sbIcon" maxlength="4" placeholder="🔁"></div>
+            <div><label data-i18n="monthlyAmt">Monthly amount (KD)</label><input type="number" id="sbAmt" step="0.001" min="0.001" required></div>
+            <div><label data-i18n="renewDay">Renewal day (1–31)</label><input type="number" id="sbDay" min="1" max="31" value="1" required></div>
+            <div><label data-i18n="category">Category</label><select id="sbCat"></select></div>
+            <div><label data-i18n="paymentType">Payment Type</label><select id="sbPay"></select></div>
+            <div><label data-i18n="remindLbl">Remind me before renewal (days)</label>
+              <select id="sbRemind"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="7">7</option></select></div>
+          </div>
+          <button class="btn blue full" type="submit" data-i18n="addSubBtn">Add Subscription ➕</button>
+        </form>
+      </div>
+    </div>
+    <div id="bill-inst" style="display:none">
+      <div class="card">
+        <h2 data-i18n="instTitle">📆 Installments</h2>
+        <div id="instList"></div>
+        <label data-i18n="presetsLbl">Quick add:</label>
+        <div class="preset-grid" id="instPresets"></div>
+        <form onsubmit="return addInst(event)">
+          <div class="grid3">
+            <div><label data-i18n="subName">Name</label><input type="text" id="inName" maxlength="40" required></div>
+            <div><label data-i18n="iconLbl">Icon (emoji)</label><input type="text" id="inIcon" maxlength="4" placeholder="📆"></div>
+            <div><label data-i18n="monthlyAmt">Monthly amount (KD)</label><input type="number" id="inAmt" step="0.001" min="0.001" required></div>
+            <div><label data-i18n="monthsTotal">Total months</label><input type="number" id="inTotal" min="1" max="120" required></div>
+            <div><label data-i18n="monthsPaid">Months already paid</label><input type="number" id="inPaid" min="0" max="120" value="0" required></div>
+            <div><label data-i18n="category">Category</label><select id="inCat"></select></div>
+            <div><label data-i18n="paymentType">Payment Type</label><select id="inPay"></select></div>
+          </div>
+          <button class="btn blue full" type="submit" data-i18n="addInstBtn">Add Installment ➕</button>
+        </form>
+      </div>
+    </div>
+    <div id="bill-inc" style="display:none">
+      <div class="card">
+        <h2 data-i18n="incomeTitle">💵 Add Income</h2>
+        <form onsubmit="return addIncome(event)">
+          <div class="grid2">
+            <div><label data-i18n="date">Date</label><input type="date" id="iDate" required></div>
+            <div><label data-i18n="amountKD">Amount (KD)</label><input type="number" id="iAmount" step="0.001" min="0.001" placeholder="0.000" required></div>
+            <div><label data-i18n="source">Source</label><select id="iSrc" required></select></div>
+            <div><label data-i18n="descOpt">Description (optional)</label><input type="text" id="iDesc" maxlength="120"></div>
+          </div>
+          <button class="btn green full" type="submit" data-i18n="saveIncome">Save Income 💾</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2 data-i18n="incomeListTitle">📥 Income History</h2>
+        <div class="table-scroll">
+          <table>
+            <thead><tr>
+              <th data-i18n="date">Date</th><th data-i18n="source">Source</th>
+              <th data-i18n="description">Description</th><th style="text-align:end" data-i18n="amount">Amount</th><th></th>
+            </tr></thead>
+            <tbody id="incomeBody"></tbody>
+          </table>
         </div>
-        <button class="btn blue full" type="submit" data-i18n="addInstBtn">Add Installment ➕</button>
-      </form>
+        <div class="empty" id="incomeEmpty" style="display:none" data-i18n="noData">Nothing to show yet.</div>
+        <div class="total-line"><span id="totIncCount"></span><span id="totIncSum"></span></div>
+      </div>
     </div>
   </section>
 
-  <!-- ---- GOALS ---- -->
-  <section class="panel" id="tab-goals">
-    <div class="card">
-      <h2 data-i18n="goalsTitle">🎯 Savings Goals</h2>
-      <div id="goalList"></div>
-      <form onsubmit="return addGoal(event)">
-        <div class="grid2">
-          <div><label data-i18n="goalName">Goal name</label><input type="text" id="gName" maxlength="40" required></div>
-          <div><label data-i18n="goalTarget">Target (KD)</label><input type="number" id="gTarget" step="0.001" min="0.001" required></div>
-        </div>
-        <button class="btn blue full" type="submit" data-i18n="addGoalBtn">Add Goal ➕</button>
-      </form>
+  <!-- ---- BUCKETS (Budgets + Goals) ---- -->
+  <section class="panel" id="tab-buckets">
+    <div class="addseg">
+      <button id="bkSegBud" class="active" onclick="setBucketSeg('bud')" data-i18n="budgetsSeg">💰 Budgets</button>
+      <button id="bkSegGoal" onclick="setBucketSeg('goal')" data-i18n="goalsSeg">🎯 Goals</button>
+    </div>
+    <div id="bucket-bud">
+      <div class="card">
+        <h2 data-i18n="budgetTitle">🎯 Monthly Budget per Category (optional)</h2>
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:14px" data-i18n="budgetHint">
+          Leave a field empty for no budget on that category. Budgets appear on the Dashboard with color warnings.</p>
+        <form onsubmit="return saveBudgetsForm(event)">
+          <label data-i18n="totalBudget">Overall monthly budget (KD)</label>
+          <input type="number" id="totalBudgetInput" step="0.001" min="0" placeholder="—">
+          <div class="budget-grid" id="budgetGrid"></div>
+          <button class="btn green full" type="submit" style="margin-top:10px" data-i18n="saveBudgets">Save Budgets 💾</button>
+        </form>
+      </div>
+    </div>
+    <div id="bucket-goal" style="display:none">
+      <div class="card">
+        <h2 data-i18n="goalsTitle">🎯 Savings Goals</h2>
+        <div id="goalList"></div>
+        <form onsubmit="return addGoal(event)">
+          <div class="grid2">
+            <div><label data-i18n="goalName">Goal name</label><input type="text" id="gName" maxlength="40" required></div>
+            <div><label data-i18n="goalTarget">Target (KD)</label><input type="number" id="gTarget" step="0.001" min="0.001" required></div>
+          </div>
+          <label data-i18n="chooseIcon">Choose an icon</label>
+          <div class="icon-pick" id="goalIconPick"></div>
+          <label data-i18n="chooseColor">Choose a color</label>
+          <div class="color-pick" id="goalColorPick"></div>
+          <button class="btn blue full" type="submit" style="margin-top:12px" data-i18n="addGoalBtn">Add Goal ➕</button>
+        </form>
+      </div>
     </div>
   </section>
 
@@ -587,36 +644,10 @@
       <div class="empty" id="reportEmpty" style="display:none" data-i18n="noMatch">No expenses match these filters.</div>
       <div class="total-line"><span id="totCount"></span><span id="totSum"></span></div>
     </div>
-    <div class="card" id="incomeCard">
-      <h2 data-i18n="incomeListTitle">📥 Income History</h2>
-      <div class="table-scroll">
-        <table>
-          <thead><tr>
-            <th data-i18n="date">Date</th><th data-i18n="source">Source</th>
-            <th data-i18n="description">Description</th><th style="text-align:end" data-i18n="amount">Amount</th><th></th>
-          </tr></thead>
-          <tbody id="incomeBody"></tbody>
-        </table>
-      </div>
-      <div class="empty" id="incomeEmpty" style="display:none" data-i18n="noData">Nothing to show yet.</div>
-      <div class="total-line"><span id="totIncCount"></span><span id="totIncSum"></span></div>
-    </div>
   </section>
 
   <!-- ---- SETTINGS ---- -->
   <section class="panel" id="tab-settings">
-
-    <div class="card">
-      <h2 data-i18n="budgetTitle">🎯 Monthly Budget per Category (optional)</h2>
-      <p style="font-size:.85rem;color:var(--muted);margin-bottom:14px" data-i18n="budgetHint">
-        Leave a field empty for no budget on that category. Budgets appear on the Dashboard with color warnings.</p>
-      <form onsubmit="return saveBudgetsForm(event)">
-        <label data-i18n="totalBudget">Overall monthly budget (KD)</label>
-        <input type="number" id="totalBudgetInput" step="0.001" min="0" placeholder="—">
-        <div class="budget-grid" id="budgetGrid"></div>
-        <button class="btn green full" type="submit" style="margin-top:10px" data-i18n="saveBudgets">Save Budgets 💾</button>
-      </form>
-    </div>
 
     <div class="card">
       <h2 data-i18n="myCatsTitle">🏷️ My Custom Categories</h2>
@@ -708,6 +739,8 @@ const CATEGORIES = [
   {name:"Car maintenance", ar:"صيانة السيارة",   color:"#ff9f43", icon:"🚗"},
   {name:"Gifts",           ar:"هدايا",            color:"#fe5196", icon:"🎁"},
   {name:"Shopping",        ar:"تسوق",             color:"#a55eea", icon:"🛍️"},
+  {name:"Subscriptions",   ar:"الاشتراكات",      color:"#5b8def", icon:"🔁"},
+  {name:"Installments",    ar:"الأقساط",          color:"#e8590c", icon:"📆"},
   {name:"Others",          ar:"أخرى",             color:"#8395a7", icon:"📦"}
 ];
 /* d = brand domain; its real logo is loaded from a logo CDN (falls back to the emoji) */
@@ -866,7 +899,10 @@ en:{
   iconLbl:"Icon (emoji)", presetsLbl:"Quick add:",
   activeCount:"Active", perYear:"Per year", dueWeek:"Due this week",
   incExpTrend:"💵 Income vs Expenses (last 6 months)", legIncome:"Income", legExpenses:"Expenses",
-  txns:"Transactions", avgTxn:"Avg / transaction", dailyAvg:"Daily average", catsUsed:"Categories used"
+  txns:"Transactions", avgTxn:"Avg / transaction", dailyAvg:"Daily average", catsUsed:"Categories used",
+  tabBuckets:"🪣 Buckets", budgetsSeg:"💰 Budgets", goalsSeg:"🎯 Goals",
+  subsSeg:"🔁 Subscriptions", instSeg:"📆 Installments", incomeSeg:"💵 Income",
+  chooseIcon:"Choose an icon", chooseColor:"Choose a color"
 },
 ar:{
   appTitle:"مصاريفي", signInSub:"الرجاء تسجيل الدخول للمتابعة",
@@ -959,7 +995,10 @@ ar:{
   iconLbl:"الأيقونة (إيموجي)", presetsLbl:"إضافة سريعة:",
   activeCount:"نشط", perYear:"سنوياً", dueWeek:"مستحق هذا الأسبوع",
   incExpTrend:"💵 الدخل مقابل المصاريف (آخر 6 أشهر)", legIncome:"الدخل", legExpenses:"المصاريف",
-  txns:"عدد العمليات", avgTxn:"متوسط العملية", dailyAvg:"المتوسط اليومي", catsUsed:"الفئات المستخدمة"
+  txns:"عدد العمليات", avgTxn:"متوسط العملية", dailyAvg:"المتوسط اليومي", catsUsed:"الفئات المستخدمة",
+  tabBuckets:"🪣 السلال", budgetsSeg:"💰 الميزانيات", goalsSeg:"🎯 الأهداف",
+  subsSeg:"🔁 الاشتراكات", instSeg:"📆 الأقساط", incomeSeg:"💵 الدخل",
+  chooseIcon:"اختر أيقونة", chooseColor:"اختر لوناً"
 }};
 
 /* ================= STORAGE ================= */
@@ -1068,7 +1107,7 @@ function applyI18n(){
   document.documentElement.lang=settings.lang;
   document.documentElement.dir=settings.lang==="ar"?"rtl":"ltr";
   document.title=t("appTitle")+" 💰";
-  const ll=document.getElementById("loginLogo"); if(ll) ll.src=settings.lang==="ar"?"logo-ar.jpg":"logo-en.jpg";
+  const ll=document.getElementById("loginLogo"); if(ll) ll.src=settings.lang==="ar"?"logo-ar.png":"logo-en.png";
   document.getElementById("langBtn").textContent=settings.lang==="ar"?"English":"عربي";
   document.querySelectorAll("[data-i18n]").forEach(el=>{ el.innerHTML=t(el.dataset.i18n); });
   document.querySelectorAll("[data-i18n-ph]").forEach(el=>{ el.placeholder=t(el.dataset.i18nPh); });
@@ -1256,15 +1295,24 @@ function showTab(id){
   if(id==="dash") renderDash();
   if(id==="report") renderReport();
   if(id==="bills") renderBills();
-  if(id==="goals") renderGoals();
+  if(id==="buckets") { renderGoals(); buildBudgetGrid(); }
   if(id==="insights") renderInsightsTab();
   window.scrollTo({top:0});
 }
-function setAddMode(m){
-  document.getElementById("segExp").classList.toggle("active",m==="exp");
-  document.getElementById("segInc").classList.toggle("active",m==="inc");
-  document.getElementById("formExpense").style.display=m==="exp"?"block":"none";
-  document.getElementById("formIncome").style.display=m==="inc"?"block":"none";
+function setBillSeg(id){
+  ["sub","inst","inc"].forEach(k=>{
+    document.getElementById("bill-"+k).style.display=k===id?"block":"none";
+    document.getElementById("billSeg"+{sub:"Sub",inst:"Inst",inc:"Inc"}[k]).classList.toggle("active",k===id);
+  });
+  if(id==="inc") renderIncome();
+}
+function setBucketSeg(id){
+  document.getElementById("bucket-bud").style.display=id==="bud"?"block":"none";
+  document.getElementById("bucket-goal").style.display=id==="goal"?"block":"none";
+  document.getElementById("bkSegBud").classList.toggle("active",id==="bud");
+  document.getElementById("bkSegGoal").classList.toggle("active",id==="goal");
+  if(id==="bud") buildBudgetGrid();
+  if(id==="goal") renderGoals();
 }
 function navMonth(delta){
   const now=new Date();
@@ -1990,6 +2038,17 @@ function browserNotify(){
 }
 
 /* ================= GOALS ================= */
+const GOAL_ICONS=["🏖️","🚗","🏠","💍","🎓","💰","🎮","👶","✈️","📱","💻","⌚","👟","🎁","🛋️","🐾"];
+const GOAL_COLORS=["#2f9e44","#1971c2","#9c36b5","#e8590c","#e64980","#1098ad","#795548","#5c7c8a","#f76707","#3b5bdb","#0ca678","#f0b429"];
+let goalIcon=GOAL_ICONS[5], goalColor=GOAL_COLORS[0];
+function buildGoalPickers(){
+  const ip=document.getElementById("goalIconPick");
+  if(ip) ip.innerHTML=GOAL_ICONS.map(ic=>'<button type="button" class="ic-opt'+(ic===goalIcon?" sel":"")+'" onclick="pickGoalIcon(\''+ic+'\')">'+ic+"</button>").join("");
+  const cp=document.getElementById("goalColorPick");
+  if(cp) cp.innerHTML=GOAL_COLORS.map(c=>'<button type="button" class="col-opt'+(c===goalColor?" sel":"")+'" style="background:'+c+'" onclick="pickGoalColor(\''+c+'\')"></button>').join("");
+}
+function pickGoalIcon(ic){ goalIcon=ic; buildGoalPickers(); }
+function pickGoalColor(c){ goalColor=c; buildGoalPickers(); }
 function addGoal(e){
   e.preventDefault();
   const target=parseFloat(document.getElementById("gTarget").value);
@@ -1997,10 +2056,12 @@ function addGoal(e){
   goals.push({
     id:Date.now()+"_"+Math.random().toString(36).slice(2,7),
     name:document.getElementById("gName").value.trim(),
-    target:Math.round(target*1000)/1000, saved:0
+    target:Math.round(target*1000)/1000, saved:0,
+    icon:goalIcon, color:goalColor
   });
   saveGoals();
   document.getElementById("gName").value=""; document.getElementById("gTarget").value="";
+  goalIcon=GOAL_ICONS[5]; goalColor=GOAL_COLORS[0]; buildGoalPickers();
   toast(t("goalAdded")); renderGoals();
   return false;
 }
@@ -2020,16 +2081,19 @@ function addToGoal(id){
   renderGoals();
 }
 function renderGoals(){
+  buildGoalPickers();
   const el=document.getElementById("goalList");
   el.innerHTML=goals.length?goals.map(g=>{
     const pct=Math.min(100,Math.round(g.saved/g.target*100));
     const done=g.saved>=g.target;
-    return '<div class="goal-row"><div class="goal-head">'+
+    const col=g.color||"#2f9e44";
+    return '<div class="goal-row" style="border-inline-start:5px solid '+col+'"><div class="goal-head">'+
+      iconBadge(g.icon||"💰",null,"g-icon")+
       '<span class="g-name">'+(done?"🏆 ":"")+esc(g.name)+"</span>"+
       "<b>"+fmtNum(g.saved)+" / "+fmtNum(g.target)+" "+t("kd")+" ("+pct+"%)</b>"+
       '<button class="del-btn" onclick="delGoal(\''+g.id+'\')">✕</button></div>'+
-      '<div class="prog-track" style="height:14px"><div class="prog-fill" style="width:'+pct+'%;'+
-        (done?"background:linear-gradient(135deg,#2f9e44,#69db7c)":"")+'"></div></div>'+
+      '<div class="prog-track" style="height:14px"><div class="prog-fill" style="width:'+pct+'%;background:'+
+        (done?"linear-gradient(135deg,#2f9e44,#69db7c)":"linear-gradient(135deg,"+col+","+col+")")+'"></div></div>'+
       (done?'<div style="margin-top:8px;font-weight:800;color:#2f9e44">'+t("goalReached")+"</div>"
            :'<div class="goal-add"><input type="number" step="0.001" min="0.001" placeholder="0.000" id="gAdd_'+g.id+'">'+
             '<button class="btn small blue" type="button" onclick="addToGoal(\''+g.id+'\')">'+t("addMoney")+"</button></div>")+
@@ -2147,15 +2211,15 @@ function fillDropdowns(){
   fPay.value=keep.fPay||PAYMENTS[0].name; qPay.value=keep.qPay;
   iSrc.value=keep.iSrc||SOURCES[0].name;
   /* bills forms */
-  [["sbCat","sbPay"],["inCat","inPay"]].forEach(([catId,payId])=>{
+  [["sbCat","sbPay","Subscriptions"],["inCat","inPay","Installments"]].forEach(([catId,payId,defCat])=>{
     const cs=document.getElementById(catId), ps=document.getElementById(payId);
     const kc=cs.value, kp=ps.value;
     cs.innerHTML=""; allCats().forEach(c=>cs.add(new Option(catIcon(c.name)+" "+catLabel(c.name),c.name)));
     ps.innerHTML=""; PAYMENTS.forEach(p=>ps.add(new Option(payLabel(p.name),p.name)));
-    cs.value=kc||CATEGORIES[0].name; ps.value=kp||PAYMENTS[0].name;
+    cs.value=kc||defCat; ps.value=kp||PAYMENTS[0].name;
   });
 }
-function refreshAll(){ renderDash(); renderReport(); renderIncome(); renderBills(); renderGoals(); renderInsightsTab(); }
+function refreshAll(){ renderDash(); renderReport(); renderIncome(); renderBills(); renderGoals(); buildGoalPickers(); renderInsightsTab(); }
 /* one-time rebrand: adopt the new Masareefy Green theme for everyone who
    was still on the old default, so the app matches the new logo */
 (function rebrandTheme(){
