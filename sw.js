@@ -1,7 +1,8 @@
 /* Masareefy service worker — cache-first so the app works offline */
-const CACHE = "masareefy-v2";
+const CACHE = "masareefy-v3";
 const ASSETS = ["./", "./masareefy.html", "./index.html", "./manifest.json",
-  "./masareefy-logo.svg", "./icon-192.png", "./icon-512.png"];
+  "./masareefy-logo.svg", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png",
+  "./logo-en.png", "./logo-ar.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
