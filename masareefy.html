@@ -334,6 +334,19 @@
     .stats{grid-template-columns:1fr 1fr;}
   }
 
+  /* ---------- SETTINGS LIST ---------- */
+  .set-list{display:flex; flex-direction:column;}
+  .set-row{display:flex; align-items:center; gap:12px; padding:12px 4px; border-bottom:1px solid #eeeaf2;}
+  .set-row:last-child{border-bottom:none;}
+  .set-ic{width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    font-size:1.25rem; flex-shrink:0; background:linear-gradient(145deg,#ffffff,#e9efe9);
+    box-shadow:4px 4px 9px rgba(30,80,60,.14), -3px -3px 7px rgba(255,255,255,.9);}
+  .set-label{font-weight:700; flex:1;}
+  .set-hint{color:var(--muted); font-size:.85rem; font-weight:600;}
+  .set-ctrl{margin:0; width:auto; max-width:180px; padding:9px 12px; border-radius:11px; font-weight:700;
+    font-size:.85rem; border:2px solid #e3e0f0; background:#fff; color:var(--accent); cursor:pointer;}
+  select.set-ctrl{color:var(--ink);}
+
   /* ---------- TOAST ---------- */
   #toast{position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(80px); background:#2d2a4a; color:#fff;
     padding:12px 22px; border-radius:30px; font-weight:600; opacity:0; transition:all .3s; z-index:99; box-shadow:0 10px 24px rgba(0,0,0,.3);}
@@ -654,6 +667,28 @@
   <section class="panel" id="tab-settings">
 
     <div class="card">
+      <h2 data-i18n="prefsTitle">⚙️ Preferences</h2>
+      <div class="set-list">
+        <div class="set-row">
+          <span class="set-ic">🌐</span>
+          <span class="set-label" data-i18n="languageLbl">Language</span>
+          <button class="set-ctrl" onclick="toggleLang()" id="langRowBtn">English / عربي</button>
+        </div>
+        <div class="set-row">
+          <span class="set-ic">💱</span>
+          <span class="set-label" data-i18n="currencyLbl">Currency</span>
+          <select class="set-ctrl" id="currencySel" onchange="setCurrency(this.value)"></select>
+        </div>
+        <div class="set-row">
+          <span class="set-ic">🎨</span>
+          <span class="set-label" data-i18n="themeTitle">🎨 Theme &amp; Colors</span>
+          <span class="set-hint" id="curThemeName"></span>
+        </div>
+      </div>
+      <div class="theme-grid" id="themeGrid" style="margin-top:14px"></div>
+    </div>
+
+    <div class="card">
       <h2 data-i18n="myCatsTitle">🏷️ My Custom Categories</h2>
       <div class="cc-list" id="customCatList"></div>
       <form onsubmit="return addCustomCat(event)">
@@ -677,11 +712,6 @@
         </div>
         <button class="btn full" type="submit" data-i18n="updatePass">Update Password 🔐</button>
       </form>
-    </div>
-
-    <div class="card">
-      <h2 data-i18n="themeTitle">🎨 Theme &amp; Colors</h2>
-      <div class="theme-grid" id="themeGrid"></div>
     </div>
 
     <!-- ---- ADMIN CARD ---- -->
@@ -759,6 +789,18 @@ const SUB_PRESETS = [
   {n:"Gym",i:"🏋️",cat:"Gym membership"},        {n:"Internet",i:"🌐"},
   {n:"Mobile plan",i:"📱"}
 ];
+const CURRENCIES = [
+  {code:"KWD", en:"Kuwaiti Dinar",   ar:"دينار كويتي",   sym:"KD",  arSym:"د.ك", dec:3},
+  {code:"USD", en:"US Dollar",       ar:"دولار أمريكي",  sym:"$",   arSym:"$",   dec:2},
+  {code:"EUR", en:"Euro",            ar:"يورو",          sym:"€",   arSym:"€",   dec:2},
+  {code:"GBP", en:"British Pound",   ar:"جنيه إسترليني", sym:"£",   arSym:"£",   dec:2},
+  {code:"SAR", en:"Saudi Riyal",     ar:"ريال سعودي",    sym:"SR",  arSym:"ر.س", dec:2},
+  {code:"AED", en:"UAE Dirham",      ar:"درهم إماراتي",  sym:"AED", arSym:"د.إ", dec:2},
+  {code:"QAR", en:"Qatari Riyal",    ar:"ريال قطري",     sym:"QR",  arSym:"ر.ق", dec:2},
+  {code:"BHD", en:"Bahraini Dinar",  ar:"دينار بحريني",  sym:"BD",  arSym:"د.ب", dec:3},
+  {code:"OMR", en:"Omani Rial",      ar:"ريال عماني",    sym:"OR",  arSym:"ر.ع", dec:3},
+  {code:"EGP", en:"Egyptian Pound",  ar:"جنيه مصري",     sym:"E£",  arSym:"ج.م", dec:2}
+];
 const INST_PRESETS = [
   {n:"Bank loan",i:"🏦"},{n:"Rent",i:"🏠",cat:"Rent"},{n:"Phone",i:"📱"},{n:"Car",i:"🚗",cat:"Car maintenance"},
   {n:"Laptop",i:"💻"},{n:"Furniture",i:"🛋️"},{n:"Jam'iya",i:"👥"},{n:"School fees",i:"🎓",cat:"School fees"}
@@ -823,7 +865,7 @@ en:{
   byCategory:"🎨 Spending by Category (this month)", byPayment:"💳 Spending by Payment Type (this month)",
   monthCompare:"📈 Month-to-Month Comparison (last 6 months)", viewBars:"Bars", viewPie:"Pie",
   noExpMonth:"No expenses this month yet — add your first one! 🌟", noData:"Nothing to show yet.",
-  addTitle:"➕ Add New Expense", date:"Date", amountKD:"Amount (KD)", category:"Category", paymentType:"Payment Type",
+  addTitle:"➕ Add New Expense", date:"Date", amountKD:"Amount", category:"Category", paymentType:"Payment Type",
   description:"Description", descOpt:"Description (optional)", descPh:"e.g. Weekly groceries from the co-op",
   saveExpense:"Save Expense 💾", saved:"✅ Expense saved", badAmount:"❌ Enter a valid amount",
   filters:"🔍 Filters", fromDate:"From date", toDate:"To date", allCats:"All categories", allPays:"All payment types",
@@ -851,7 +893,7 @@ en:{
   userDeleted:"🗑️ User deleted", resetPassBtn:"Reset password", promptNewPass:u=>"New password for \""+u+"\":",
   passReset:"🔐 Password reset!", themeSet:"🎨 Theme applied!",
   aboutTitle:"ℹ️ About",
-  aboutBody:"All data is stored privately on this computer (browser local storage) — nothing is sent online. Each user profile has its own expenses and budgets. Currency: Kuwaiti Dinar (KD), 3 decimals. Use Export CSV regularly to keep a backup you can open in Excel.",
+  aboutBody:"All data is stored privately on this device (browser local storage) — nothing is sent online. Each user profile has its own expenses and budgets. Pick your currency in Preferences (changing it re-labels amounts; it does not convert existing values). Use Backup &amp; Restore or Export CSV to keep a copy of your data.",
   kd:"KD", csvHead:["Date","Category","Payment Type","Description","Amount (KD)"],
   tabIncome:"💵 Income", incomeTitle:"💵 Add Income", source:"Source", incomeListTitle:"📥 Income History",
   saveIncome:"Save Income 💾", incomeSaved:"✅ Income saved", confirmDelIncome:"Delete this income entry?",
@@ -906,7 +948,8 @@ en:{
   txns:"Transactions", avgTxn:"Avg / transaction", dailyAvg:"Daily average", catsUsed:"Categories used",
   tabBuckets:"🪣 Buckets", budgetsSeg:"💰 Budgets", goalsSeg:"🎯 Goals",
   subsSeg:"🔁 Subscriptions", instSeg:"📆 Installments", incomeSeg:"💵 Income",
-  chooseIcon:"Choose an icon", chooseColor:"Choose a color"
+  chooseIcon:"Choose an icon", chooseColor:"Choose a color",
+  prefsTitle:"⚙️ Preferences", languageLbl:"Language", currencyLbl:"Currency", currencySet:"💱 Currency set to"
 },
 ar:{
   appTitle:"مصاريفي", signInSub:"الرجاء تسجيل الدخول للمتابعة",
@@ -919,7 +962,7 @@ ar:{
   byCategory:"🎨 المصاريف حسب الفئة (هذا الشهر)", byPayment:"💳 المصاريف حسب طريقة الدفع (هذا الشهر)",
   monthCompare:"📈 مقارنة الأشهر (آخر ٦ أشهر)", viewBars:"أعمدة", viewPie:"دائري",
   noExpMonth:"لا توجد مصاريف هذا الشهر — أضيفي أول مصروف! 🌟", noData:"لا توجد بيانات بعد.",
-  addTitle:"➕ إضافة مصروف جديد", date:"التاريخ", amountKD:"المبلغ (د.ك)", category:"الفئة", paymentType:"طريقة الدفع",
+  addTitle:"➕ إضافة مصروف جديد", date:"التاريخ", amountKD:"المبلغ", category:"الفئة", paymentType:"طريقة الدفع",
   description:"الوصف", descOpt:"الوصف (اختياري)", descPh:"مثال: تسوق أسبوعي من الجمعية",
   saveExpense:"حفظ المصروف 💾", saved:"✅ تم حفظ المصروف", badAmount:"❌ أدخلي مبلغاً صحيحاً",
   filters:"🔍 التصفية", fromDate:"من تاريخ", toDate:"إلى تاريخ", allCats:"كل الفئات", allPays:"كل طرق الدفع",
@@ -947,7 +990,7 @@ ar:{
   userDeleted:"🗑️ تم حذف المستخدم", resetPassBtn:"إعادة تعيين كلمة المرور", promptNewPass:u=>"كلمة المرور الجديدة لـ \""+u+"\":",
   passReset:"🔐 تمت إعادة تعيين كلمة المرور!", themeSet:"🎨 تم تطبيق المظهر!",
   aboutTitle:"ℹ️ حول التطبيق",
-  aboutBody:"جميع البيانات محفوظة بشكل خاص على هذا الجهاز (التخزين المحلي للمتصفح) — لا يُرسل أي شيء عبر الإنترنت. لكل مستخدم مصاريفه وميزانياته الخاصة. العملة: دينار كويتي (د.ك) بثلاث خانات عشرية. صدّري نسخة CSV بانتظام كنسخة احتياطية تُفتح في Excel.",
+  aboutBody:"جميع البيانات محفوظة بشكل خاص على هذا الجهاز (التخزين المحلي للمتصفح) — لا يُرسل أي شيء عبر الإنترنت. لكل مستخدم مصاريفه وميزانياته الخاصة. اختر عملتك من التفضيلات (تغيير العملة يغيّر رمزها فقط ولا يحوّل القيم الموجودة). استخدم النسخ الاحتياطي أو تصدير CSV للاحتفاظ بنسخة من بياناتك.",
   kd:"د.ك", csvHead:["التاريخ","الفئة","طريقة الدفع","الوصف","المبلغ (د.ك)"],
   tabIncome:"💵 الدخل", incomeTitle:"💵 إضافة دخل", source:"المصدر", incomeListTitle:"📥 سجل الدخل",
   saveIncome:"حفظ الدخل 💾", incomeSaved:"✅ تم حفظ الدخل", confirmDelIncome:"حذف هذا الدخل؟",
@@ -1002,7 +1045,8 @@ ar:{
   txns:"عدد العمليات", avgTxn:"متوسط العملية", dailyAvg:"المتوسط اليومي", catsUsed:"الفئات المستخدمة",
   tabBuckets:"🪣 السلال", budgetsSeg:"💰 الميزانيات", goalsSeg:"🎯 الأهداف",
   subsSeg:"🔁 الاشتراكات", instSeg:"📆 الأقساط", incomeSeg:"💵 الدخل",
-  chooseIcon:"اختر أيقونة", chooseColor:"اختر لوناً"
+  chooseIcon:"اختر أيقونة", chooseColor:"اختر لوناً",
+  prefsTitle:"⚙️ التفضيلات", languageLbl:"اللغة", currencyLbl:"العملة", currencySet:"💱 تم ضبط العملة إلى"
 }};
 
 /* ================= STORAGE ================= */
@@ -1011,8 +1055,9 @@ function lsGet(key,fallback){ try{ const v=JSON.parse(localStorage.getItem(key))
 function loadUsers(){ return lsGet(LS_USERS,[]); }
 function saveUsers(u){ localStorage.setItem(LS_USERS,JSON.stringify(u)); }
 function loadSettings(){
-  const s=Object.assign({lang:"en",theme:"masareefy",chartView:"bars"}, lsGet(LS_SETTINGS,{}));
+  const s=Object.assign({lang:"en",theme:"masareefy",chartView:"bars",currency:"KWD"}, lsGet(LS_SETTINGS,{}));
   if(!THEMES.find(t=>t.id===s.theme)) s.theme="masareefy";
+  if(!CURRENCIES.find(c=>c.code===s.currency)) s.currency="KWD";
   return s;
 }
 function saveSettings(){ localStorage.setItem(LS_SETTINGS,JSON.stringify(settings)); }
@@ -1115,8 +1160,22 @@ function applyI18n(){
   document.getElementById("langBtn").textContent=settings.lang==="ar"?"English":"عربي";
   document.querySelectorAll("[data-i18n]").forEach(el=>{ el.innerHTML=t(el.dataset.i18n); });
   document.querySelectorAll("[data-i18n-ph]").forEach(el=>{ el.placeholder=t(el.dataset.i18nPh); });
-  fillDropdowns();
+  fillDropdowns(); fillPrefs();
   if(currentUser){ setWhoami(); buildBudgetGrid(); renderThemeGrid(); renderUsers(); renderCustomCats(); refreshAll(); }
+}
+function fillPrefs(){
+  const sel=document.getElementById("currencySel");
+  if(sel){
+    sel.innerHTML="";
+    CURRENCIES.forEach(c=>{
+      const name=settings.lang==="ar"?c.ar:c.en;
+      const sym=settings.lang==="ar"?c.arSym:c.sym;
+      sel.add(new Option(name+" ("+sym+")",c.code));
+    });
+    sel.value=settings.currency;
+  }
+  const lb=document.getElementById("langRowBtn");
+  if(lb) lb.textContent=settings.lang==="ar"?"English":"عربي";
 }
 function toggleLang(){
   settings.lang=settings.lang==="ar"?"en":"ar";
@@ -1136,7 +1195,7 @@ function applyTheme(id){
 }
 function currentTheme(){
   const id=currentUser&&currentUser.theme?currentUser.theme:settings.theme;
-  return THEMES.find(x=>x.id===id)?id:"amethyst";
+  return THEMES.find(x=>x.id===id)?id:"masareefy";
 }
 function setTheme(id){
   if(currentUser){
@@ -1155,11 +1214,16 @@ function renderThemeGrid(){
     '<div><div class="theme-sw'+(sel===th.id?" sel":"")+'" style="background:'+bgGradient(th)+'" onclick="setTheme(\''+th.id+'\')"></div>'+
     '<div class="theme-name">'+themeLabel(th)+"</div></div>"
   ).join("");
+  const nm=document.getElementById("curThemeName");
+  if(nm){ const th=THEMES.find(x=>x.id===sel); nm.textContent=th?themeLabel(th):""; }
 }
 
 /* ================= HELPERS ================= */
-function fmtNum(n){ return n.toLocaleString("en-US",{minimumFractionDigits:3, maximumFractionDigits:3}); }
-function fmtKD(n){ return fmtNum(n)+" "+t("kd"); }
+function curInfo(){ return CURRENCIES.find(c=>c.code===settings.currency)||CURRENCIES[0]; }
+function curUnit(){ const c=curInfo(); return settings.lang==="ar"?c.arSym:c.sym; }
+function fmtNum(n){ const d=curInfo().dec; return n.toLocaleString("en-US",{minimumFractionDigits:d, maximumFractionDigits:d}); }
+function fmtKD(n){ return fmtNum(n)+" "+curUnit(); }
+function setCurrency(code){ settings.currency=code; saveSettings(); refreshAll(); toast(t("currencySet")+" "+curUnit()); }
 function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function catColor(name){ const c=allCats().find(x=>x.name===name); return c?c.color:"#8395a7"; }
 function catIcon(name){ const c=allCats().find(x=>x.name===name); return (c&&c.icon)?c.icon:"🏷️"; }
@@ -1660,7 +1724,7 @@ function renderCatChart(byCat){
       width=Math.min(100,pct);
       if(pct>=100){ color="#d6336c"; cls="over-budget"; }
       else if(pct>=80){ color="#f76707"; cls="near-budget"; }
-      amtHtml='<span class="'+cls+'">'+fmtNum(r.spent)+" / "+fmtNum(r.budget)+" "+t("kd")+(pct>=100?" ⚠️":"")+"</span>";
+      amtHtml='<span class="'+cls+'">'+fmtNum(r.spent)+" / "+fmtNum(r.budget)+" "+curUnit()+(pct>=100?" ⚠️":"")+"</span>";
     } else {
       width=max>0?Math.max(4,r.spent/max*100):4;
       amtHtml=fmtKD(r.spent);
@@ -2094,7 +2158,7 @@ function renderGoals(){
     return '<div class="goal-row" style="border-inline-start:5px solid '+col+'"><div class="goal-head">'+
       iconBadge(g.icon||"💰",null,"g-icon")+
       '<span class="g-name">'+(done?"🏆 ":"")+esc(g.name)+"</span>"+
-      "<b>"+fmtNum(g.saved)+" / "+fmtNum(g.target)+" "+t("kd")+" ("+pct+"%)</b>"+
+      "<b>"+fmtNum(g.saved)+" / "+fmtNum(g.target)+" "+curUnit()+" ("+pct+"%)</b>"+
       '<button class="del-btn" onclick="delGoal(\''+g.id+'\')">✕</button></div>'+
       '<div class="prog-track" style="height:14px"><div class="prog-fill" style="width:'+pct+'%;background:'+
         (done?"linear-gradient(135deg,#2f9e44,#69db7c)":"linear-gradient(135deg,"+col+","+col+")")+'"></div></div>'+
